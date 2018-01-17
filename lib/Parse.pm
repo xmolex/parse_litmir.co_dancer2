@@ -2,8 +2,6 @@ package Parse;
 use Dancer2;
 use Modern::Perl;
 use utf8;
-use LWP 5.64;
-use HTTP::Cookies;
 use Lib::Vars;
 use Lib::Db;
 use Lib::Parseurl;
@@ -31,7 +29,10 @@ post '/delete' => sub {
     }
     
     # удаляем
-    sql("DELETE FROM data WHERE id='$id';");
+    if ($id) {
+        sql("DELETE FROM data WHERE id='$id';");
+    }
+    
     return();
 };
 
@@ -41,7 +42,7 @@ any '/getcat' => sub {
     my @result;
 
     # получаем страницу
-    my $page = body_parameters->get('page');
+    my $page = body_parameters->get('page') || 1;
     if ($page !~ m/^\d+$/) {$page = 1;}
     if ($page < 1) {$page = 1;}
     

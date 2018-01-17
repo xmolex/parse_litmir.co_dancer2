@@ -6,6 +6,8 @@ package Lib::Parseurl;
 
 use Modern::Perl;
 use utf8;
+use LWP 5.64;
+use HTTP::Cookies;
 use Lib::Vars;
 use Exporter;
 our @ISA    = qw(Exporter);

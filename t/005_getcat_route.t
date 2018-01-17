@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 5;
+use Test::More tests => 2;
 use Parse;
 use Plack::Test;
 use HTTP::Request::Common;
@@ -11,7 +11,7 @@ my $app = Parse->to_app;
 ok( is_coderef($app), 'Got app' );
 
 my $test = Plack::Test->create($app);
-my $res  = $test->request( POST '/getcat' );
 
+my $res  = $test->request( POST '/getcat' );
 ok( $res->is_success, '[POST /getcat] successful' );
 

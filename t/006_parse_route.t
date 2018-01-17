@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 4;
+use Test::More tests => 2;
 use Parse;
 use Plack::Test;
 use HTTP::Request::Common;

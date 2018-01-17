@@ -1,8 +1,8 @@
 use strict;
 use warnings;
 
-use Test::More tests => 3;
 use Parse;
+use Test::More tests => 2;
 use Plack::Test;
 use HTTP::Request::Common;
 use Ref::Util qw<is_coderef>;
