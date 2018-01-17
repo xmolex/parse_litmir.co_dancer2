@@ -1,4 +1,5 @@
 use strict;
+use utf8;
 use warnings;
 use lib "lib/";
 use Test::Spec;
@@ -12,10 +13,10 @@ my $url = 'http://www.litmir.co/bs?year_after=&year_before=&PagesCountMin=&Pages
 
 my ($id, $title, $poster, $rating, $page, $writer, $genres, $lang, $year, $link);
 
-# получаем данные с $url
+# РїРѕР»СѓС‡Р°РµРј РґР°РЅРЅС‹Рµ СЃ $url
 my $data = parseurl($url);
 
-# проходимся по всем данным и пытаемся собрать данные всех типов для сравнения
+# РїСЂРѕС…РѕРґРёРјСЃСЏ РїРѕ РІСЃРµРј РґР°РЅРЅС‹Рј Рё РїС‹С‚Р°РµРјСЃСЏ СЃРѕР±СЂР°С‚СЊ РґР°РЅРЅС‹Рµ РІСЃРµС… С‚РёРїРѕРІ РґР»СЏ СЃСЂР°РІРЅРµРЅРёСЏ
 for ( my $i = 0; $i < scalar(@$data); $i = $i + 10 ) {
     if (!$id     && $$data[$i])   {$id     = $$data[$i];}
     if (!$title  && $$data[$i+1]) {$title  = $$data[$i+1];}
@@ -29,7 +30,7 @@ for ( my $i = 0; $i < scalar(@$data); $i = $i + 10 ) {
     if (!$link   && $$data[$i+9]) {$link   = $$data[$i+9];}
 }
 
-# проводим тест
+# РїСЂРѕРІРѕРґРёРј С‚РµСЃС‚
 describe "Parseurl" => sub {
     describe "got" => sub {
         it "ID" => sub {
@@ -41,7 +42,7 @@ describe "Parseurl" => sub {
         it "POSTER" => sub {
             is _is_string($poster), 1;
         };
-        # т.к. очень часто рейтинг пустой, то отключим его
+        # С‚.Рє. РѕС‡РµРЅСЊ С‡Р°СЃС‚Рѕ СЂРµР№С‚РёРЅРі РїСѓСЃС‚РѕР№, С‚Рѕ РѕС‚РєР»СЋС‡РёРј РµРіРѕ
         # it "RATING" => sub {
         #     is _is_numeric_include_real($rating), 1;
         # };
