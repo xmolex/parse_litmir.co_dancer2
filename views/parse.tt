@@ -1,0 +1,39 @@
+<div class="masthead">
+    <ul class="nav nav-justified">
+        <li><a href="/">Каталог</a></li>
+        <li class="active"><a href="/parse">Заполнить</a></li>
+    </ul>
+</div>
+
+
+<p>
+<form role="form" onsubmit="GetReq(); return false">
+  <div class="form-group">
+    <label for="url">insert url</label>
+    <input type="url" class="form-control" id="url" placeholder="Enter url" value="http://www.litmir.co/bs?year_after=&year_before=&PagesCountMin=&PagesCountMax=&publish_city=&name=&genre=273&ExcludeGenresIds=0&lang=RU&src_lang=&kw=&rs=0&order=OnShow.Down&hc=on">
+  </div>
+  <button id="mybutton" type="submit" class="btn btn-warning" onclick="GetReq(); return false">Parse</button>
+</form>
+</p>
+<script>
+function GetReq() {
+    var url = document.getElementById('url').value;
+    if (!url) {
+        alert('не могу обработать значение в поле url');
+        return;
+    }
+
+    $("#mybutton").prop('disabled', true);
+    $.ajax({
+        type: 'POST',
+        data: ({ "url" : url }),
+        async: true,
+        url: '/parse',
+        success: function (data, textStatus) {
+            $("#mybutton").prop('disabled', false);
+            alert(data);
+        }               
+   });
+}
+</script>
+

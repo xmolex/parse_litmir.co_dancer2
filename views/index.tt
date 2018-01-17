@@ -1,0 +1,99 @@
+<div class="masthead">
+    <ul class="nav nav-justified">
+        <li class="active"><a href="/">Каталог</a></li>
+        <li><a href="/parse">Заполнить</a></li>
+    </ul>
+</div>
+
+<div style="padding: 30px;">
+<a href="" onclick="GetPage(1); return false">Назад</a>
+<span id="numpage"></span>
+<a href="" onclick="GetPage(0); return false">Вперед</a>
+</div>
+
+
+<table id="table" data-height="460">
+    <thead>
+        <tr>
+            <th data-field="poster">постер</th>
+            <th data-field="id">ID</th>
+            <th data-field="title">название</th>
+            <th data-field="rating">рейтинг</th>
+            <th data-field="page">страниц</th>
+            <th data-field="writer">автор</th>
+            <th data-field="genres">жанры</th>
+            <th data-field="lang">язык</th>
+            <th data-field="year">год</th>
+            <th data-field="link">ссылка</th>
+            <th data-field="delete">удалить</th>
+        </tr>
+    </thead>
+</table>
+
+<div style="padding: 30px;">
+<a href="/getcat?file=1"> Скачать JSON файл</a>
+</div>
+
+<script>
+var global_page = 1;
+var table_load  = 0;
+$('#numpage').html(global_page);
+
+function GetPage(minus) {
+    if (minus) {
+        global_page--;
+    }
+    else {
+        global_page++;
+    }
+    if (global_page < 1 || global_page > 10) {global_page = 1;}
+    $('#numpage').html(global_page);
+    GetData();
+}
+
+function GetData() {
+
+    var mydata = {};
+    $.ajax({
+        type: 'POST',
+        data: ({ "page" : global_page }),
+        async: false,
+        url: '/getcat',
+        success: function (data, textStatus) {
+            mydata = JSON.parse(data);
+        }           
+   });
+   
+   // проходимся и превращаем в более нужное нам отображение
+   for (i = 0; i < mydata.length; i++) {
+       mydata[i].poster = '<img src="' + mydata[i].poster + '" style="width: 40px;">';
+       mydata[i].link = '<a href="' + mydata[i].link + '">перейти</a>';
+       mydata[i].delete = '<a href="" onclick="Delete(' + mydata[i].id + '); return false">удалить</a>';
+   }
+
+   if (!table_load) {
+       // первое обращение
+       $('#table').bootstrapTable({ data: mydata });
+       table_load = 1;
+   }
+   else {
+       // нужно обновить
+       $('#table').bootstrapTable('load', mydata);
+   }
+   
+}
+
+function Delete(id) {
+    if (!id) {return;}
+    $.ajax({
+        type: 'POST',
+        data: ({ "id" : id }),
+        async: true,
+        url: '/delete',
+        success: function (data, textStatus) {GetData();}           
+   });
+}
+
+
+GetData();
+</script>
