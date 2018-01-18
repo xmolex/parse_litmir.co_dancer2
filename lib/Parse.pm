@@ -24,9 +24,7 @@ get '/parse' => sub {
 post '/delete' => sub {
     # получаем идентификатор и проверяем его
     my $id = body_parameters->get('id');
-    if ($id !~ m/^\d+$/) {
-        return('wrong id');
-    }
+    return('wrong id') if $id !~ m/^\d+$/;
     
     # удаляем
     if ($id) {
@@ -126,7 +124,7 @@ post '/parse' => sub {
     my $cookie_jar = HTTP::Cookies->new(file => $AGENT_COOKIE, autosave => 1);
     
     # делаем запросы по страницам, подставляя номер страницы в запрос
-    for ( my $i = 1; $i < $COUNT_REPEAT_REQ + 1; $i++ ) {
+    foreach my $i ( 1 .. $COUNT_REPEAT_REQ ) {
         
         # получаем массив с данными id,title,poster,rating,page,writer,genres,lang,year,link
         my $data = parseurl( $url . "&p=$i" );

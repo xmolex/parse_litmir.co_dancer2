@@ -27,12 +27,9 @@ sub parseurl {
     my @result;
     
     # получаем код страницы
-    $browser->cookie_jar($cookie_jar);
-    my $req = HTTP::Request->new( GET => $url );
-    $req->header( Accept => "text/html, */*;q=0.1", referer => $AGENT_REFERER );
-    my $response = $browser->request($req);
-    my $data = $response->decoded_content;
-    on_utf8(\$data); # указываем явно, что это utf8
+    my $data = _get_data_from_url($url);
+    # указываем явно, что это utf8
+    on_utf8(\$data);
       
     # избавляемся от переносов строк
     $data =~ s/\n//g;
@@ -173,6 +170,17 @@ sub parseurl {
     # отдаем данные
     return(\@result);
 
+}
+
+# получаем url и возвращаем html
+sub _get_data_from_url {
+    my ($url) = @_;
+    $browser->cookie_jar($cookie_jar);
+    my $req = HTTP::Request->new( GET => $url );
+    $req->header( Accept => "text/html, */*;q=0.1", referer => $AGENT_REFERER );
+    my $response = $browser->request($req);
+    my $data = $response->decoded_content;
+    return $data;
 }
 
 1;
