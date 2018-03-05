@@ -4,8 +4,6 @@
 use strict;
 use utf8;
 use Modern::Perl;
-use FindBin;
-use lib "$FindBin::../lib";
 use Test::Spec;
 use Lib::Parseurl;
 

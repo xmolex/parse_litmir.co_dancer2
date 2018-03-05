@@ -70,18 +70,18 @@ any '/getcat' => sub {
     
     $sql = sql($sql);
     if ($$sql[0]) {
-        for ( my $i = 0; $i < scalar(@$sql); $i = $i + 10) {
+        for ( my $i = 0; $i < @$sql; $i = $i + 10) {
             my %data = (
-                         'id'     => $$sql[$i],
-                         'title'  => $$sql[$i+1],
-                         'poster' => $$sql[$i+2],
-                         'rating' => $$sql[$i+3] || '',
-                         'page'   => $$sql[$i+4] || '',
-                         'writer' => $$sql[$i+5],
-                         'genres' => $$sql[$i+6],
-                         'lang'   => $$sql[$i+7],
-                         'year'   => $$sql[$i+8] || '',
-                         'link'   => $$sql[$i+9]
+                         id     => $$sql[$i],
+                         title  => $$sql[$i+1],
+                         poster => $$sql[$i+2],
+                         rating => $$sql[$i+3] || '',
+                         page   => $$sql[$i+4] || '',
+                         writer => $$sql[$i+5],
+                         genres => $$sql[$i+6],
+                         lang   => $$sql[$i+7],
+                         year   => $$sql[$i+8] || '',
+                         link   => $$sql[$i+9]
             );
         
             push @result, \%data;
@@ -101,7 +101,7 @@ any '/getcat' => sub {
     }
     
     # отдаем json
-    return($data);
+    return $data;
 };
 
 # парсим
@@ -124,13 +124,13 @@ post '/parse' => sub {
     my $cookie_jar = HTTP::Cookies->new(file => $AGENT_COOKIE, autosave => 1);
     
     # делаем запросы по страницам, подставляя номер страницы в запрос
-    foreach my $i ( 1 .. $COUNT_REPEAT_REQ ) {
+    for my $i ( 1 .. $COUNT_REPEAT_REQ ) {
         
         # получаем массив с данными id,title,poster,rating,page,writer,genres,lang,year,link
         my $data = parseurl( $url . "&p=$i" );
         
         # проходимся по массиву и заносим данные в базу
-        for (my $j = 0; $j < scalar(@$data); $j = $j + 10 ) {
+        for ( my $j = 0; $j < @$data; $j = $j + 10 ) {
         
             # замещаем спецтеги в текстовых полях перед добавлением
             $$data[$j+1] = tr_html $$data[$j+1]; # title

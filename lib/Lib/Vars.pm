@@ -1,8 +1,7 @@
 package Lib::Vars;
 use utf8;
 use Encode;
-require Exporter;
-@ISA = qw(Exporter);
+use Exporter 'import';
 
 #########################################################################################################
 # НАСТРОЙКИ
@@ -40,33 +39,44 @@ our $COUNT_REPEAT_REQ = 10; # количество повторных запро
 
 # получаем SQL команду и экранизируем опасности
 sub tr_sql {
-  $_[0] =~ s!'!\'!g;
-  return($_[0]);
+    my ($str) = @_;
+    $str =~ s/'/''/gs;
+    return $str;
 }
 
 # производим замены для принятых значений, которые должны пойти на вывод в html
 sub tr_html {
-    $_[0] =~ s/&/&amp;/go;
-    $_[0] =~ s/</&lt;/go;
-    $_[0] =~ s/>/&gt;/go;
-    $_[0] =~ s/'/&apos;/go;
-    $_[0] =~ s/"/&quot;/go;
-    return($_[0]);
+    my ($str) = @_;
+    $str =~ s/&/&amp;/gs;
+    $str =~ s/</&lt;/gs;
+    $str =~ s/>/&gt;/gs;
+    $str =~ s/'/&apos;/gs;
+    $str =~ s/"/&quot;/gs;
+    return $str;
 }
 
 # формируем дату и время для базы данных, либо только дату (флаг вторым параметром)
+# время можно передать в unix формате
 sub get_sql_time {
-    my $time = shift || time();
+    my $time = shift // time();
     my( $sec, $min, $hour, $mday, $mon, $year ) = localtime($time);
     $year = $year + 1900;
     $mon++;
+    
+    # добавляем ведущие нули
+    $mon  = sprintf '%02d', $mon;
+    $mday = sprintf '%02d', $mday;
+    $hour = sprintf '%02d', $hour;
+    $min  = sprintf '%02d', $min;
+    $sec  = sprintf '%02d', $sec;
+    
     if ($_[0]) {
         # запрос только на дату
-        return("$year-$mon-$mday");
+        return "$year-$mon-$mday";
     }
     else {
         # запрос на дату и время
-        return( "$year-$mon-$mday $hour:$min:$sec" );
+        return "$year-$mon-$mday $hour:$min:$sec";
     }
     
 }

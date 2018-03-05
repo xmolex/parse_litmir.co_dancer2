@@ -7,24 +7,23 @@ use Modern::Perl;
 use utf8;
 use DBI;
 use Lib::Vars;
-use Exporter;
-our @ISA    = qw(Exporter);
+use Exporter 'import';
 our @EXPORT = qw(&sql &get_sql_object);
 
 my $conn;
 
-# подключаемся к базе mysql
+# функция подключения к базе mysql
 sub _toconnect {
     $conn = DBI->connect("dbi:mysql:$DB_NAME:$DB_HOST:$DB_PORT", "$DB_USER", "$DB_PASS", {AutoCommit => 1});
     if ($conn) {
         $conn->{'mysql_enable_utf8'} = 1;
         $conn->do("SET NAMES `utf8`;");
         $conn->do("SET CHARACTER SET `utf8`;");
-        return(1);
+        return 1;
     }
     else {
         warn "Don't connect database: \'\"dbi:mysql:$DB_NAME:$DB_HOST:$DB_PORT\", \"$DB_USER\", \"$DB_PASS\"'\n";
-        return();
+        return;
     }
 }
 
@@ -32,38 +31,32 @@ sub _toconnect {
 # выполняем sql запрос
 # вторым параметром передают флаг, когда не ожидают ответа
 sub sql {
-    my ( $command, $do ) = @_;
-    my @result = ();
+    my ( $command, $silence ) = @_;
+    my @result;
     
     # если команды нет, отдаем пустой массив
-    if (!$command) { return (\@result); }
+    return (\@result) unless $command;
   
     # если не подключены, то пробуем подключиться
     if (!$conn) {
         if ( ! _toconnect() ) {
-            open(ERR, ">>$PATH_LOG_DB");
-            print ERR "| " . get_sql_time() . " | Don't connect database server\n";
-            close(ERR);
+            _to_log("Don't connect database server");
             $conn = 0;
             return (\@result);
         }
     }
     
-    if ($do) {
+    if ($silence) {
         # запрос на выполнение без ответа
-        unless ( $conn->do("$command") ) {
-            # ошибка выполнения
-            my $err_msg = $conn->errstr();
-            on_utf8(\$err_msg);
-            my ( $package, $filename, $line ) = caller;
-            open(ERR, ">>$PATH_LOG_DB");
-            print ERR "| " . get_sql_time() . " | "."$package:$line | $err_msg: '$command'\n";
-            close(ERR);
-            return(0);
-        } else {
-            # выполнить удалось
-            return(1);
-        }
+        return 1 if $conn->do($command);
+        
+        # ошибка выполнения
+        my $err_msg = $conn->errstr();
+        on_utf8(\$err_msg);
+        my ( $package, $filename, $line ) = caller;
+        _to_log("$package:$line | $err_msg: '$command'");
+        return;
+
     }
     else {
         # запрос на выполнение с получением данных
@@ -72,9 +65,7 @@ sub sql {
             # запрос выполнен
             while (my @value = $strin->fetchrow_array) {
                 # заполняем массив данными для вывода
-                foreach (@value) {
-                     push( @result, $_ );
-                }
+                push @result, $_ for @value;
             }
             $strin->finish;
             return (\@result);
@@ -83,9 +74,7 @@ sub sql {
             my $err_msg = $conn->errstr();
             on_utf8(\$err_msg);
             my ( $package, $filename, $line ) = caller;
-            open(ERR, ">>$PATH_LOG_DB");
-            print ERR "| " . get_sql_time() . " | "."$package:$line | $err_msg: '$command'\n";
-            close(ERR);
+            _to_log("$package:$line | $err_msg: '$command'");
         }
     }
     return (\@result);
@@ -96,14 +85,21 @@ sub get_sql_object {
     # если не подключены, то пробуем подключиться
     if (!$conn) {
         if ( ! _toconnect() ) {
-            open(ERR, ">>$PATH_LOG_DB");
-            print ERR "| " . get_sql_time() . " | Don't connect database server\n";
-            close(ERR);
+            _to_log("Don't connect database server");
             $conn = 0;
         }
     }
     # отдаем объект или ложь
     return($conn);
+}
+
+# функция записи в лог файл
+sub _to_log {
+    my ($txt) = @_;
+    open my $fh, ">>:utf8", $PATH_LOG_DB;
+    return unless $fh;
+    say $fh "| " . get_sql_time() . " | " . $txt;
+    close $fh;
 }
 
 1;
